@@ -1,1 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Автобусный Парк</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f4f9; color: #333; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        th { background-color: #3e52d5; color: white; }
+        tr:hover { background-color: #f9f9f9; }
+        h1, h2 { color: #2c3e50; border-bottom: 2px solid #3e52d5; padding-bottom: 10px; }
+        .form-section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px; }
+        button { padding: 8px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        .status-ok { color: #28a745; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Управление Автобусным Парком</h1>
+        <p class="status-ok">✔ База данных: Supabase подключена</p>
 
+        <h2>Расписание маршрутов</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Время</th>
+                    <th>Маршрут</th>
+                    <th>Автобус</th>
+                    <th>Остановка</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in schedules %}
+                <tr>
+                    <td>{{ item.departure_time.strftime('%H:%M') }}</td>
+                    <td>{{ item.route.route_number }}</td>
+                    <td>{{ item.bus.number_plate }} ({{ item.bus.model }})</td>
+                    <td>{{ item.stop_name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="form-section">
+            <h2>Добавить нового водителя</h2>
+            <form action="/add_driver" method="POST">
+                <input type="text" name="name" placeholder="ФИО водителя" required>
+                <input type="number" name="exp" placeholder="Стаж (лет)" required>
+                <button type="submit">Добавить в базу</button>
+            </form>
+        </div>
+
+        <h2>Наши водители</h2>
+        <ul>
+            {% for driver in drivers %}
+            <li><strong>{{ driver.full_name }}</strong> — стаж {{ driver.experience }} лет</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
