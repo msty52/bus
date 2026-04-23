@@ -2,55 +2,63 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Автобусный Парк</title>
+    <title>Управление Автобусным Парком</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f4f9; color: #333; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
-        th { background-color: #3e52d5; color: white; }
-        tr:hover { background-color: #f9f9f9; }
-        h1, h2 { color: #2c3e50; border-bottom: 2px solid #3e52d5; padding-bottom: 10px; }
-        .form-section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
-        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px; }
-        button { padding: 8px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #218838; }
-        .status-ok { color: #28a745; font-weight: bold; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 40px; background-color: #f0f2f5; color: #1c1e21; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h1, h2 { color: #3e52d5; border-bottom: 2px solid #e4e6eb; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 15px; border-bottom: 1px solid #e4e6eb; text-align: left; }
+        th { background-color: #f8f9fa; color: #65676b; text-transform: uppercase; font-size: 12px; }
+        .form-box { background: #f7f8fa; padding: 25px; border-radius: 10px; margin: 20px 0; border: 1px solid #ddd; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        input, select { padding: 10px; border: 1px solid #ced4da; border-radius: 5px; width: 100%; }
+        button { padding: 10px 25px; background-color: #3e52d5; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #2d3eb1; }
+        .badge { background: #e7f3ff; color: #1877f2; padding: 5px 10px; border-radius: 5px; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Управление Автобусным Парком</h1>
-        <p class="status-ok">✔ База данных: Supabase подключена</p>
+        <h1>🚍 Система управления автопарком</h1>
+        <p style="color: #28a745;">● База данных Supabase активна</p>
 
-        <h2>Расписание маршрутов</h2>
+        <h2>Текущее расписание</h2>
         <table>
-            <thead>
-                <tr>
-                    <th>Время</th>
-                    <th>Маршрут</th>
-                    <th>Автобус</th>
-                    <th>Остановка</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in schedules %}
-                <tr>
-                    <td>{{ item.departure_time.strftime('%H:%M') }}</td>
-                    <td>{{ item.route.route_number }}</td>
-                    <td>{{ item.bus.number_plate }} ({{ item.bus.model }})</td>
-                    <td>{{ item.stop_name }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <tr>
+                <th>Время</th>
+                <th>Маршрут</th>
+                <th>Автобус</th>
+                <th>Остановка</th>
+            </tr>
+            {% for item in schedules %}
+            <tr>
+                <td><strong>{{ item.departure_time.strftime('%H:%M') }}</strong></td>
+                <td>№{{ item.route.route_number }} ({{ item.route.start_point }} - {{ item.route.end_point }})</td>
+                <td><span class="badge">{{ item.bus.number_plate }}</span> {{ item.bus.model }}</td>
+                <td>{{ item.stop_name }}</td>
+            </tr>
+            {% endfor %}
         </table>
 
-        <div class="form-section">
-            <h2>Добавить нового водителя</h2>
-            <form action="/add_driver" method="POST">
-                <input type="text" name="name" placeholder="ФИО водителя" required>
-                <input type="number" name="exp" placeholder="Стаж (лет)" required>
-                <button type="submit">Добавить в базу</button>
+        <div class="form-box">
+            <h3>➕ Добавить рейс в расписание</h3>
+            <form action="/add_schedule" method="POST" class="form-grid">
+                <select name="bus_id" required>
+                    <option value="">Выбрать автобус</option>
+                    {% for bus in buses %}
+                    <option value="{{ bus.id }}">{{ bus.number_plate }} ({{ bus.model }})</option>
+                    {% endfor %}
+                </select>
+                <select name="route_id" required>
+                    <option value="">Выбрать маршрут</option>
+                    {% for route in routes %}
+                    <option value="{{ route.id }}">№{{ route.route_number }} ({{ route.start_point }})</option>
+                    {% endfor %}
+                </select>
+                <input type="time" name="dep_time" required>
+                <input type="text" name="stop" placeholder="Название остановки">
+                <button type="submit">Создать рейс</button>
             </form>
         </div>
 
@@ -60,6 +68,15 @@
             <li><strong>{{ driver.full_name }}</strong> — стаж {{ driver.experience }} лет</li>
             {% endfor %}
         </ul>
+
+        <div class="form-box">
+            <h3>➕ Зарегистрировать водителя</h3>
+            <form action="/add_driver" method="POST" class="form-grid">
+                <input type="text" name="name" placeholder="ФИО водителя" required>
+                <input type="number" name="exp" placeholder="Стаж" required>
+                <button type="submit" style="background-color: #28a745;">Добавить водителя</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>
