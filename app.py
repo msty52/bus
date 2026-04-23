@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Ссылка для подключения (используем твой пуллен для стабильности)
+# Настройка подключения (Render подхватит DATABASE_URL автоматически)
 LOCAL_DB_URL = 'postgresql://postgres:ТВОЙ_ПАРОЛЬ@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?sslmode=require'
 uri = os.environ.get('DATABASE_URL') or LOCAL_DB_URL
 if uri and uri.startswith("postgres://"):
@@ -37,7 +37,7 @@ class Route(db.Model):
     end_point = db.Column(db.String(100))
 
 class Schedule(db.Model):
-    __tablename__ = 'Schedules'
+    __tablename__ = 'Schedules' # Имя таблицы в Supabase
     id = db.Column('номер', db.Integer, primary_key=True)
     bus_id = db.Column('номер автобуса', db.Integer, db.ForeignKey('buses.id'))
     route_id = db.Column('идентификатор маршрута', db.Integer, db.ForeignKey('routes.id'))
@@ -47,7 +47,7 @@ class Schedule(db.Model):
     bus = db.relationship('Bus', backref='schedules')
     route = db.relationship('Route', backref='schedules')
 
-# --- МАРШРУТЫ (ЛОГИКА) ---
+# --- ЛОГИКА ПРИЛОЖЕНИЯ ---
 
 @app.route('/')
 def index():
@@ -55,6 +55,7 @@ def index():
         buses = Bus.query.all()
         drivers = Driver.query.all()
         routes = Route.query.all()
+        # Сортируем расписание по времени
         schedules = Schedule.query.order_by(Schedule.departure_time).all()
         return render_template('index.html', buses=buses, drivers=drivers, routes=routes, schedules=schedules)
     except Exception as e:
