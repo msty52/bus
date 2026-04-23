@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Ссылка для подключения
+# Ссылка для подключения (используем твой пуллен для стабильности)
 LOCAL_DB_URL = 'postgresql://postgres:ТВОЙ_ПАРОЛЬ@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?sslmode=require'
 uri = os.environ.get('DATABASE_URL') or LOCAL_DB_URL
 if uri and uri.startswith("postgres://"):
@@ -14,7 +14,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# --- МОДЕЛИ ---
+# --- МОДЕЛИ ДАННЫХ ---
+
 class Bus(db.Model):
     __tablename__ = 'buses'
     id = db.Column(db.Integer, primary_key=True)
@@ -53,9 +54,9 @@ def index():
     try:
         buses = Bus.query.all()
         drivers = Driver.query.all()
+        routes = Route.query.all()
         schedules = Schedule.query.order_by(Schedule.departure_time).all()
-        # Теперь просто вызываем файл по имени:
-        return render_template('index.html', buses=buses, drivers=drivers, schedules=schedules)
+        return render_template('index.html', buses=buses, drivers=drivers, routes=routes, schedules=schedules)
     except Exception as e:
         return f"Ошибка базы данных: {e}"
 
@@ -66,6 +67,24 @@ def add_driver():
     if name and exp:
         new_driver = Driver(full_name=name, experience=int(exp))
         db.session.add(new_driver)
+        db.session.commit()
+    return redirect(url_for('index'))
+
+@app.route('/add_schedule', methods=['POST'])
+def add_schedule():
+    bus_id = request.form.get('bus_id')
+    route_id = request.form.get('route_id')
+    dep_time = request.form.get('dep_time')
+    stop = request.form.get('stop')
+    
+    if bus_id and route_id and dep_time:
+        new_sch = Schedule(
+            bus_id=int(bus_id), 
+            route_id=int(route_id), 
+            departure_time=dep_time, 
+            stop_name=stop
+        )
+        db.session.add(new_sch)
         db.session.commit()
     return redirect(url_for('index'))
 
