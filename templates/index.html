@@ -2,104 +2,39 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Автобусный Парк</title>
+    <title>Автопарк</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f8f9fa; color: #333; }
-        .header { background: #3e52d5; color: white; padding: 20px 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        
-        h2 { color: #3e52d5; margin-top: 0; border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { color: #888; font-size: 0.85rem; text-transform: uppercase; }
-        
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
-        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-        button { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-add { background: #28a745; color: white; }
-        .btn-add:hover { background: #218838; }
-        .btn-main { background: #3e52d5; color: white; }
-        
-        .route-info { color: #666; font-size: 0.9rem; }
-        .plate-badge { background: #eef1ff; color: #3e52d5; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-weight: bold; }
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background: #eee; }
     </style>
 </head>
 <body>
-
-<div class="header">
-    <h1>Автобусный Парк</h1>
-</div>
-
-<div class="container">
-    
     <div class="card">
-        <h2>Текущее расписание</h2>
+        <h1>Расписание рейсов</h1>
         <table>
-            <thead>
-                <tr>
-                    <th>Время</th>
-                    <th>Маршрут и Направление</th>
-                    <th>Автобус</th>
-                    <th>Остановка</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in schedules %}
-                <tr>
-                    <td><strong>{{ item.departure_time.strftime('%H:%M') }}</strong></td>
-                    <td>
-                        <strong>№{{ item.route.route_number }}</strong><br>
-                        <span class="route-info">{{ item.route.start_point }} ➔ {{ item.route.end_point }}</span>
-                    </td>
-                    <td><span class="plate-badge">{{ item.bus.number_plate }}</span><br><small>{{ item.bus.model }}</small></td>
-                    <td>{{ item.stop_name }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <tr>
+                <th>Время</th>
+                <th>Маршрут</th>
+                <th>Автобус</th>
+            </tr>
+            {% for item in schedules %}
+            <tr>
+                <td>{{ item.departure_time.strftime('%H:%M') }}</td>
+                <td>№{{ item.route.route_number }} ({{ item.route.start_point }} — {{ item.route.end_point }})</td>
+                <td>{{ item.bus.number_plate }}</td>
+            </tr>
+            {% endfor %}
         </table>
-    </div>
 
-    <div class="card">
-        <h2>Добавить рейс</h2>
-        <form action="/add_schedule" method="POST" class="form-grid">
-            <select name="bus_id" required>
-                <option value="">Выберите автобус</option>
-                {% for bus in buses %}
-                <option value="{{ bus.id }}">{{ bus.number_plate }} ({{ bus.model }})</option>
-                {% endfor %}
-            </select>
-            <select name="route_id" required>
-                <option value="">Выберите маршрут</option>
-                {% for route in routes %}
-                <option value="{{ route.id }}">№{{ route.route_number }} ({{ route.start_point }})</option>
-                {% endfor %}
-            </select>
-            <input type="time" name="dep_time" required>
-            <input type="text" name="stop" placeholder="Остановка">
-            <button type="submit" class="btn-main">Создать рейс</button>
-        </form>
-    </div>
-
-    <div class="card">
-        <h2>Водители на смене</h2>
+        <h2>Водители</h2>
         <ul>
-            {% for driver in drivers %}
-            <li><strong>{{ driver.full_name }}</strong> (Стаж: {{ driver.experience }} лет)</li>
+            {% for d in drivers %}
+            <li>{{ d.full_name }} (стаж: {{ d.experience }} лет)</li>
             {% endfor %}
         </ul>
-        
-        <hr>
-        
-        <h3>Добавить водителя</h3>
-        <form action="/add_driver" method="POST" class="form-grid">
-            <input type="text" name="name" placeholder="ФИО водителя" required>
-            <input type="number" name="exp" placeholder="Стаж" required>
-            <button type="submit" class="btn-add">Зарегистрировать</button>
-        </form>
     </div>
-
-</div>
-
 </body>
 </html>
