@@ -4,6 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
+# Подключение к базе
+LOCAL_DB_URL = 'postgresql://postgres:ТВОЙ_ПАРОЛЬ@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?sslmode=require'
+uri = os.environ.get('DATABASE_URL') or LOCAL_DB_URL
 if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 
