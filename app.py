@@ -4,18 +4,14 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Берем ссылку из настроек Render (Environment Variables)
 uri = os.environ.get('DATABASE_URL')
 
-# Исправляем формат ссылки для SQLAlchemy
 if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
-# --- МОДЕЛИ ДАННЫХ ---
 
 class Bus(db.Model):
     __tablename__ = 'buses'
@@ -47,13 +43,11 @@ class Schedule(db.Model):
     bus = db.relationship('Bus', backref='schedules')
     route = db.relationship('Route', backref='schedules')
 
-# --- ЛОГИКА ---
-
 @app.route('/')
 def index():
     try:
         drivers = Driver.query.all()
-        # ВАЖНО: Сортировка по времени отправления (от 00:00 до 23:59)
+        
         schedules = Schedule.query.order_by(Schedule.departure_time).all()
         return render_template('index.html', drivers=drivers, schedules=schedules)
     except Exception as e:
