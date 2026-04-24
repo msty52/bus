@@ -4,17 +4,15 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Подключение к базе
-LOCAL_DB_URL = 'postgresql://postgres:Aswedrfgtthkl@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?sslmode=require'
-uri = os.environ.get('DATABASE_URL') or LOCAL_DB_URL
+uri = os.environ.get('DATABASE_URL')
+
 if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
 
-# --- МОДЕЛИ ДАННЫХ (ORM) ---
+db = SQLAlchemy(app)
 
 class Bus(db.Model):
     __tablename__ = 'buses'
@@ -37,6 +35,7 @@ class Route(db.Model):
 
 class Schedule(db.Model):
     __tablename__ = 'Schedules'
+    
     id = db.Column('номер', db.Integer, primary_key=True)
     bus_id = db.Column('номер автобуса', db.Integer, db.ForeignKey('buses.id'))
     route_id = db.Column('идентификатор маршрута', db.Integer, db.ForeignKey('routes.id'))
@@ -46,17 +45,15 @@ class Schedule(db.Model):
     bus = db.relationship('Bus', backref='schedules')
     route = db.relationship('Route', backref='schedules')
 
-# --- ГЛАВНАЯ СТРАНИЦА ---
-
 @app.route('/')
 def index():
     try:
+
         drivers = Driver.query.all()
-        # Загружаем расписание, отсортированное по времени
         schedules = Schedule.query.order_by(Schedule.departure_time).all()
         return render_template('index.html', drivers=drivers, schedules=schedules)
     except Exception as e:
-        return f"Ошибка подключения к базе: {e}"
+        return f"Ошибка базы данных: {e}"
 
 if __name__ == '__main__':
     app.run(debug=True)
