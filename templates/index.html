@@ -25,7 +25,7 @@
 <body>
 
 <div class="container">
-    <h1>Расписание автобусов</h1>
+    <h1>Автобусный парк</h1>
 
     <table>
         <thead>
@@ -41,7 +41,7 @@
                 <td class="time-cell">{{ item.departure_time.strftime('%H:%M') }}</td>
                 <td>
                     <span class="route-name">№{{ item.route.route_number }}</span><br>
-                    <span class="route-detail">{{ item.route.start_point }} — {{ item.route.end_point }}</span>
+                    <span class="route-detail">{{ item.route.start_point }} - {{ item.route.end_point }}</span>
                 </td>
                 <td>
                     <span class="bus-badge">{{ item.bus.number_plate }}</span><br>
